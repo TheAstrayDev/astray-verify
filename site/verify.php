@@ -83,7 +83,7 @@ $verifyFaqSchema = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/main.css?v=cli6">
-  <link rel="stylesheet" href="/assets/css/verify.css?v=3">
+  <link rel="stylesheet" href="/assets/css/verify.css?v=4">
 </head>
 <body>
 
