@@ -221,5 +221,5 @@ $verifyFaqSchema = [
   </section>
 </main>
 
-<script src="/assets/js/verify.js?v=2" defer></script>
+<script src="/assets/js/verify.js?v=3" defer></script>
 <?php require __DIR__ . '/includes/footer.php'; ?>
