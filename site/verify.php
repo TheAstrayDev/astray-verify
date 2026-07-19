@@ -26,8 +26,8 @@ $seo = [
 
 require __DIR__ . '/includes/header.php';
 
-$unixInstall = 'curl -fsSL https://theastraydev.online/verify-install.sh | sh';
-$windowsInstall = 'curl.exe -fsSL https://theastraydev.online/verify-install.ps1 | powershell -NoProfile -ExecutionPolicy Bypass -';
+$unixInstall = 'curl -fsSL https://raw.githubusercontent.com/TheAstrayDev/astray-verify/main/install.sh | sh';
+$windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev/astray-verify/main/install.ps1 | powershell -NoProfile -ExecutionPolicy Bypass -';
 ?>
 
 <main class="verify" id="main">

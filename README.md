@@ -35,13 +35,13 @@ plain JSON, designed to be reviewed and committed with the server source.
 ### Linux and macOS
 
 ```bash
-curl -fsSL https://theastraydev.online/verify-install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/TheAstrayDev/astray-verify/main/install.sh | sh
 ```
 
 ### Windows PowerShell
 
 ```powershell
-curl.exe -fsSL https://theastraydev.online/verify-install.ps1 | powershell -NoProfile -ExecutionPolicy Bypass -
+curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev/astray-verify/main/install.ps1 | powershell -NoProfile -ExecutionPolicy Bypass -
 ```
 
 The installers download the matching binary from the latest GitHub Release.
