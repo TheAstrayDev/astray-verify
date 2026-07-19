@@ -26,13 +26,25 @@ mkdir -p "$prefix"
 tmp="$(mktemp "${TMPDIR:-/tmp}/astray-verify.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT INT TERM
 
-echo "Downloading ${asset}…"
-curl -fL --retry 3 --retry-delay 1 "$url" -o "$tmp"
-chmod 755 "$tmp"
-mv "$tmp" "$prefix/astray-verify"
-trap - EXIT INT TERM
+if curl -fsSL --retry 3 --retry-delay 1 "$url" -o "$tmp"; then
+  chmod 755 "$tmp"
+  mv "$tmp" "$prefix/astray-verify"
+  trap - EXIT INT TERM
+  echo "Installed prebuilt Astray Verify to $prefix/astray-verify"
+else
+  rm -f "$tmp"
+  trap - EXIT INT TERM
+  if ! command -v cargo >/dev/null 2>&1; then
+    echo "No prebuilt binary is available for this platform yet, and Rust is not installed." >&2
+    echo "Install Rust at https://rustup.rs, then run this command again." >&2
+    exit 1
+  fi
+  echo "No prebuilt binary yet; building the latest release from source…"
+  cargo install --git "https://github.com/${repo}.git" --locked --force astray-verify
+  prefix="${CARGO_HOME:-$HOME/.cargo}/bin"
+fi
 
-echo "Installed Astray Verify to $prefix/astray-verify"
+echo "Astray Verify is ready: $prefix/astray-verify"
 case ":${PATH}:" in
   *":${prefix}:"*) ;;
   *) echo "Add $prefix to PATH, then open a new terminal." ;;
