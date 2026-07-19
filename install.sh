@@ -27,8 +27,8 @@ tmp="$(mktemp "${TMPDIR:-/tmp}/astray-verify.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT INT TERM
 
 echo "Downloading ${asset}…"
-if curl --fail --location --silent --show-error \
-  --connect-timeout 10 --max-time 60 --retry 2 --retry-delay 1 \
+if curl --fail --location --show-error --progress-bar \
+  --connect-timeout 10 --max-time 30 --retry 1 --retry-delay 1 \
   "$url" -o "$tmp"; then
   chmod 755 "$tmp"
   mv "$tmp" "$prefix/astray-verify"
@@ -37,7 +37,7 @@ if curl --fail --location --silent --show-error \
 else
   rm -f "$tmp"
   trap - EXIT INT TERM
-  echo "A prebuilt binary could not be downloaded within 60 seconds." >&2
+  echo "A prebuilt binary could not be downloaded after a retry." >&2
   if ! command -v cargo >/dev/null 2>&1; then
     echo "Rust is not installed, so Astray Verify cannot fall back to a source build." >&2
     echo "Install Rust at https://rustup.rs, then run this command again." >&2
