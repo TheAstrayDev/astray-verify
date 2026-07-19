@@ -83,11 +83,12 @@ $verifyFaqSchema = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/main.css?v=cli6">
-  <link rel="stylesheet" href="/assets/css/verify.css?v=5">
+  <link rel="stylesheet" href="/assets/css/verify.css?v=6">
 </head>
 <body>
 
 <main class="verify" id="main">
+  <div class="verify-signal-field" aria-hidden="true"><span></span><span></span><span></span></div>
   <nav class="verify-nav" aria-label="Primary navigation">
     <a class="verify-nav__brand" href="/" aria-label="The Astray home">THE ASTRAY <span>/</span> VERIFY</a>
     <div class="verify-nav__links">
