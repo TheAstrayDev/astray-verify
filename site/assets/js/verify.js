@@ -59,8 +59,12 @@
       const original = button.textContent;
       button.textContent = 'Copied';
       button.setAttribute('aria-label', 'Command copied');
+      button.classList.add('is-copied');
       window.setTimeout(() => { button.textContent = original; }, 1400);
-      window.setTimeout(() => { button.removeAttribute('aria-label'); }, 1400);
+      window.setTimeout(() => {
+        button.removeAttribute('aria-label');
+        button.classList.remove('is-copied');
+      }, 1400);
     });
   });
 
