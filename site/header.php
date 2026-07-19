@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/seo.php';
+require_once __DIR__ . '/seo.php';
 
 if (!isset($pageTitle)) {
     $pageTitle = __('seo.title');
