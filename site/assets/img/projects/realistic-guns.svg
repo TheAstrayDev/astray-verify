@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <rect width="1200" height="675" fill="#101817"/>
+  <path d="M0 540C260 470 386 641 620 490C842 346 1002 420 1200 300" stroke="#8BE4B5" stroke-opacity=".5" stroke-width="2"/>
+  <path d="M0 560C260 490 386 661 620 510C842 366 1002 440 1200 320" stroke="#8BE4B5" stroke-opacity=".14" stroke-width="16"/>
+  <circle cx="830" cy="270" r="151" stroke="#EAF0E9" stroke-opacity=".65" stroke-width="2"/>
+  <circle cx="830" cy="270" r="86" stroke="#EAF0E9" stroke-opacity=".4" stroke-width="2" stroke-dasharray="7 11"/>
+  <path d="M653 270H1007M830 93V447" stroke="#EAF0E9" stroke-opacity=".55" stroke-width="2"/>
+  <circle cx="830" cy="270" r="7" fill="#E0583E"/>
+  <rect x="112" y="104" width="444" height="264" stroke="#8BE4B5" stroke-opacity=".6" stroke-width="2"/>
+  <text x="143" y="158" fill="#8BE4B5" font-family="monospace" font-size="22" letter-spacing="5">REALISTICGUNS</text>
+  <text x="143" y="224" fill="#F4F3EC" font-family="serif" font-size="57" font-weight="700">Ballistics,</text>
+  <text x="143" y="284" fill="#F4F3EC" font-family="serif" font-size="57" font-weight="700">not hitscan.</text>
+  <text x="143" y="334" fill="#AAB6AF" font-family="monospace" font-size="18" letter-spacing="3">PAPER · PROJECTILES · HUD</text>
+  <text x="952" y="585" fill="#8BE4B5" font-family="monospace" font-size="18" letter-spacing="4">01 / TRAJECTORY</text>
+</svg>

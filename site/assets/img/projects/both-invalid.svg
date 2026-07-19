@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <rect width="1200" height="675" fill="#171719"/>
+  <rect x="0" width="600" height="675" fill="#E9EFE6"/>
+  <path d="M600 0V675" stroke="#B5ECD0" stroke-width="4"/>
+  <circle cx="474" cy="338" r="176" fill="#102121"/>
+  <circle cx="726" cy="338" r="176" stroke="#B5ECD0" stroke-width="3"/>
+  <circle cx="474" cy="338" r="75" stroke="#B5ECD0" stroke-width="3" stroke-dasharray="10 12"/>
+  <circle cx="726" cy="338" r="75" stroke="#B5ECD0" stroke-width="3" stroke-dasharray="10 12"/>
+  <path d="M534 338H666" stroke="#E0583E" stroke-width="4"/>
+  <path d="M645 317l22 21-22 21" stroke="#E0583E" stroke-width="4" stroke-linecap="square"/>
+  <text x="103" y="137" fill="#102121" font-family="monospace" font-size="21" letter-spacing="5">BOTHINVALID</text>
+  <text x="103" y="206" fill="#102121" font-family="serif" font-size="55" font-weight="700">Two minds.</text>
+  <text x="103" y="266" fill="#102121" font-family="serif" font-size="55" font-weight="700">One avatar.</text>
+  <text x="103" y="565" fill="#40514B" font-family="monospace" font-size="18" letter-spacing="3">FABRIC · CO-OP EXPERIMENT</text>
+  <text x="755" y="571" fill="#B5ECD0" font-family="monospace" font-size="18" letter-spacing="3">MOVE / SEE</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <rect width="1200" height="675" fill="#F4F3EC"/>
+  <path d="M0 74.5H1200M0 187.5H1200M0 300.5H1200M0 413.5H1200M0 526.5H1200M120 0V675M300 0V675M480 0V675M660 0V675M840 0V675M1020 0V675" stroke="#102121" stroke-opacity=".09"/>
+  <circle cx="930" cy="270" r="205" stroke="#243B84" stroke-opacity=".2" stroke-width="2"/>
+  <circle cx="930" cy="270" r="145" stroke="#176A4B" stroke-opacity=".18" stroke-width="2" stroke-dasharray="8 12"/>
+  <rect x="177" y="130" width="810" height="415" fill="#102121" transform="rotate(2 177 130)"/>
+  <rect x="196" y="150" width="772" height="376" stroke="#EFF4EB" stroke-opacity=".3" transform="rotate(2 196 150)"/>
+  <path d="M212 204H951M212 286H951M212 368H951M212 450H951" stroke="#EFF4EB" stroke-opacity=".15" transform="rotate(2 212 204)"/>
+  <text x="230" y="186" fill="#B5ECD0" font-family="monospace" font-size="22" letter-spacing="5" transform="rotate(2 230 186)">ASTRAY VERIFY / CONTRACT</text>
+  <text x="230" y="252" fill="#EFF4EB" font-family="monospace" font-size="34" transform="rotate(2 230 252)">tools/list</text>
+  <path d="M750 242l19 19 37-40" stroke="#B5ECD0" stroke-width="7" stroke-linecap="square" transform="rotate(2 750 242)"/>
+  <text x="230" y="334" fill="#EFF4EB" font-family="monospace" font-size="34" transform="rotate(2 230 334)">schema snapshot</text>
+  <path d="M750 324l19 19 37-40" stroke="#B5ECD0" stroke-width="7" stroke-linecap="square" transform="rotate(2 750 324)"/>
+  <text x="230" y="416" fill="#FF8A70" font-family="monospace" font-size="34" transform="rotate(2 230 416)">unexpected change</text>
+  <text x="792" y="416" fill="#FF8A70" font-family="monospace" font-size="28" transform="rotate(2 792 416)">FAIL</text>
+  <text x="230" y="490" fill="#97AA9B" font-family="monospace" font-size="20" letter-spacing="4" transform="rotate(2 230 490)">RECORD · COMMIT · REPLAY</text>
+</svg>

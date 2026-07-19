@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <rect width="1200" height="675" fill="#0D3D3A"/>
+  <path d="M0 110H1200M0 225H1200M0 340H1200M0 455H1200M0 570H1200M120 0V675M300 0V675M480 0V675M660 0V675M840 0V675M1020 0V675" stroke="#B5ECD0" stroke-opacity=".12"/>
+  <rect x="126" y="126" width="948" height="423" fill="#102121" stroke="#B5ECD0" stroke-opacity=".55" stroke-width="2"/>
+  <text x="164" y="181" fill="#B5ECD0" font-family="monospace" font-size="22" letter-spacing="5">USB-CDB-HUNTER / PASSIVE</text>
+  <text x="164" y="262" fill="#EFF4EB" font-family="serif" font-size="60" font-weight="700">Read the trace.</text>
+  <text x="164" y="326" fill="#EFF4EB" font-family="serif" font-size="60" font-weight="700">Never the device.</text>
+  <rect x="164" y="385" width="870" height="1" fill="#B5ECD0" fill-opacity=".35"/>
+  <text x="164" y="440" fill="#FFB28C" font-family="monospace" font-size="25">E1 41 53 54 52 41 59 00 80 00</text>
+  <text x="164" y="490" fill="#B5ECD0" font-family="monospace" font-size="20" letter-spacing="3">SCSI · PCAPNG · FORENSICS · DIFF</text>
+  <circle cx="975" cy="178" r="12" fill="#FF8A70"/>
+</svg>
