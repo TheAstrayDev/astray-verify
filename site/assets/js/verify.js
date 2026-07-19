@@ -1,4 +1,9 @@
 (() => {
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reducedMotion) {
+    document.documentElement.classList.add('has-verify-motion');
+  }
+
   const buttons = [...document.querySelectorAll('[data-os]')];
   const panels = [...document.querySelectorAll('[data-panel]')];
 
@@ -53,7 +58,22 @@
       }
       const original = button.textContent;
       button.textContent = 'Copied';
+      button.setAttribute('aria-label', 'Command copied');
       window.setTimeout(() => { button.textContent = original; }, 1400);
+      window.setTimeout(() => { button.removeAttribute('aria-label'); }, 1400);
     });
   });
+
+  if (!reducedMotion && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.16 });
+    document.querySelectorAll('.verify-reveal').forEach((section) => observer.observe(section));
+  } else {
+    document.querySelectorAll('.verify-reveal').forEach((section) => section.classList.add('is-visible'));
+  }
 })();

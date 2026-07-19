@@ -14,13 +14,14 @@ $destination = Join-Path $installDir "astray-verify.exe"
 
 try {
   Write-Host "Downloading $asset…"
-  Invoke-WebRequest -Uri $url -OutFile $destination
+  Invoke-WebRequest -Uri $url -OutFile $destination -TimeoutSec 60
   Write-Host "Installed prebuilt Astray Verify to $destination"
   Write-Host "Add $installDir to your User PATH, then open a new terminal."
 } catch {
+  Write-Warning "A prebuilt binary could not be downloaded within 60 seconds."
   if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
-    throw "No prebuilt Windows binary is available yet and Rust is not installed. Install Rust from https://rustup.rs and run this command again."
+    throw "Rust is not installed, so Astray Verify cannot fall back to a source build. Install Rust from https://rustup.rs and run this command again."
   }
-  Write-Host "No prebuilt binary yet; building the latest release from source…"
+  Write-Host "Falling back to a source build. This can take several minutes the first time…"
   cargo install --git "https://github.com/$repo.git" --locked --force astray-verify
 }

@@ -4,33 +4,91 @@ declare(strict_types=1);
 require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/data.php';
 
-$pageTitle = 'Astray Verify — MCP regression tests';
-$lockSplash = false;
-$isHome = false;
-$extraStyles = ['/assets/css/verify.css?v=1'];
+$pageTitle = 'Astray Verify — MCP contract testing for CI';
 $seo = [
     'title' => $pageTitle,
-    'description' => 'Record an MCP server contract once. Astray Verify catches breaking tool and schema changes before AI clients do.',
-    'keywords' => 'MCP testing, Model Context Protocol, MCP regression tests, MCP CI, AI tools, Astray Verify',
-    'path' => '/verify',
-    'type' => 'website',
-    'jsonld' => [
-        seo_jsonld_website(),
-        seo_jsonld_person(),
-        seo_jsonld_breadcrumb([
-            ['name' => 'The Astray', 'url' => abs_url('/')],
-            ['name' => 'Astray Verify', 'url' => abs_url('/verify')],
-        ]),
-    ],
+    'description' => 'Open-source MCP contract testing: record tools and JSON schemas once, then catch breaking changes in CI before AI clients fail.',
 ];
-
-require __DIR__ . '/includes/header.php';
 
 $unixInstall = 'curl -fsSL https://raw.githubusercontent.com/TheAstrayDev/astray-verify/main/install.sh | sh';
 $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev/astray-verify/main/install.ps1 | powershell -NoProfile -ExecutionPolicy Bypass -';
+$verifySchema = [
+    '@context' => 'https://schema.org',
+    '@type' => 'SoftwareApplication',
+    'name' => 'Astray Verify',
+    'description' => $seo['description'],
+    'applicationCategory' => 'DeveloperApplication',
+    'operatingSystem' => 'Linux, macOS, Windows',
+    'softwareVersion' => '0.1.0',
+    'codeRepository' => 'https://github.com/TheAstrayDev/astray-verify',
+    'url' => 'https://theastraydev.online/verify',
+    'downloadUrl' => 'https://github.com/TheAstrayDev/astray-verify/releases/latest',
+    'offers' => [
+        '@type' => 'Offer',
+        'price' => '0',
+        'priceCurrency' => 'USD',
+        'availability' => 'https://schema.org/InStock',
+    ],
+];
+$verifyFaqSchema = [
+    '@context' => 'https://schema.org',
+    '@type' => 'FAQPage',
+    'mainEntity' => [
+        [
+            '@type' => 'Question',
+            'name' => 'Who is Astray Verify for?',
+            'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'Astray Verify is for people who build or maintain MCP servers and want to test the interface their AI clients call.'],
+        ],
+        [
+            '@type' => 'Question',
+            'name' => 'Does Astray Verify call an AI model?',
+            'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'No. It talks directly to an MCP server, so it does not need a model account or API key.'],
+        ],
+        [
+            '@type' => 'Question',
+            'name' => 'Does Astray Verify replace MCP Inspector?',
+            'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'No. MCP Inspector helps explore and debug a server. Astray Verify records a known-good interface and replays it after changes.'],
+        ],
+    ],
+];
 ?>
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= e($seo['title']) ?></title>
+  <meta name="description" content="<?= e($seo['description']) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="theme-color" content="#102121">
+  <link rel="canonical" href="https://theastraydev.online/verify">
+  <link rel="icon" href="/assets/img/logo.jpg" type="image/jpeg">
+  <link rel="apple-touch-icon" href="/assets/img/logo.jpg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="The Astray">
+  <meta property="og:title" content="<?= e($seo['title']) ?>">
+  <meta property="og:description" content="<?= e($seo['description']) ?>">
+  <meta property="og:url" content="https://theastraydev.online/verify">
+  <meta property="og:image" content="https://theastraydev.online/assets/img/logo.jpg">
+  <meta property="og:image:alt" content="Astray Verify — MCP contract testing">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<?= e($seo['title']) ?>">
+  <meta name="twitter:description" content="<?= e($seo['description']) ?>">
+  <meta name="twitter:image" content="https://theastraydev.online/assets/img/logo.jpg">
+  <script type="application/ld+json"><?= json_encode($verifySchema, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+  <script type="application/ld+json"><?= json_encode($verifyFaqSchema, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css?v=cli6">
+  <link rel="stylesheet" href="/assets/css/verify.css?v=2">
+</head>
+<body>
 
 <main class="verify" id="main">
+  <div class="verify-atmosphere" aria-hidden="true"><span></span><span></span><span></span></div>
   <nav class="verify-nav" aria-label="Primary navigation">
     <a class="verify-nav__brand" href="/" aria-label="The Astray home">THE ASTRAY <span>/</span> VERIFY</a>
     <div class="verify-nav__links">
@@ -41,7 +99,7 @@ $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev
   </nav>
 
   <section class="verify-hero" aria-labelledby="verify-title">
-    <div class="verify-hero__copy">
+    <div class="verify-hero__copy verify-intro">
       <p class="verify-kicker"><span class="verify-status" aria-hidden="true"></span> MCP CONTRACT TESTING · OPEN SOURCE</p>
       <h1 id="verify-title">Your MCP server still starts.<br><em>Did it still work?</em></h1>
       <p class="verify-hero__lead">Astray Verify records the tools your AI clients rely on, then catches broken names, schemas, and protocol output before you release.</p>
@@ -52,7 +110,7 @@ $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev
       <p class="verify-hero__note">A small CI check for authors of MCP servers. No model, account, or cloud required.</p>
     </div>
 
-    <div class="verify-proof" aria-label="Example Astray Verify contract check">
+    <div class="verify-proof verify-intro" aria-label="Example Astray Verify contract check">
       <div class="verify-proof__top"><span>ASTRAY VERIFY / FIXTURE</span><span>stdio</span></div>
       <div class="verify-proof__body">
         <p class="verify-proof__label">recorded interface</p>
@@ -65,7 +123,7 @@ $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev
     </div>
   </section>
 
-  <section class="verify-problem" aria-labelledby="problem-title">
+  <section class="verify-problem verify-reveal" aria-labelledby="problem-title">
     <div class="verify-section-label">THE PROBLEM</div>
     <div>
       <h2 id="problem-title">A green process is not a stable integration.</h2>
@@ -78,25 +136,25 @@ $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev
     </div>
   </section>
 
-  <section class="verify-flow" id="how" aria-labelledby="flow-title">
+  <section class="verify-flow verify-reveal" id="how" aria-labelledby="flow-title">
     <div class="verify-flow__head">
       <div class="verify-section-label">THREE STEPS</div>
       <h2 id="flow-title">Record once.<br>Protect every release.</h2>
     </div>
     <ol class="verify-steps">
-      <li>
+      <li class="verify-reveal__item">
         <span class="verify-step__number">01</span>
         <h3>Record</h3>
         <p>Start your MCP server once. Astray Verify performs the handshake and saves its tools and schemas as a small JSON fixture.</p>
         <code>astray-verify record --name github -- &lt;server&gt;</code>
       </li>
-      <li>
+      <li class="verify-reveal__item">
         <span class="verify-step__number">02</span>
         <h3>Commit</h3>
         <p>Review the fixture with your code. It becomes the explicit promise your server makes to every AI client.</p>
         <code>fixtures/github.mcp.json</code>
       </li>
-      <li>
+      <li class="verify-reveal__item">
         <span class="verify-step__number">03</span>
         <h3>Replay</h3>
         <p>Run one command locally or in CI. A change fails loudly before it becomes somebody else's broken agent workflow.</p>
@@ -105,7 +163,7 @@ $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev
     </ol>
   </section>
 
-  <section class="verify-now" aria-labelledby="now-title">
+  <section class="verify-now verify-reveal" aria-labelledby="now-title">
     <div>
       <div class="verify-section-label">FIRST RELEASE</div>
       <h2 id="now-title">Small on purpose.</h2>
@@ -119,7 +177,7 @@ $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev
     </ul>
   </section>
 
-  <section class="verify-install" id="install" aria-labelledby="install-title">
+  <section class="verify-install verify-reveal" id="install" aria-labelledby="install-title">
     <div class="verify-install__head">
       <div class="verify-section-label">GET STARTED</div>
       <h2 id="install-title">One command. Then test the change you were about to ship.</h2>
@@ -153,7 +211,7 @@ $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev
     <p class="verify-install__foot">Prefer to read every line first? <a href="https://github.com/TheAstrayDev/astray-verify" target="_blank" rel="noopener noreferrer">Open the source on GitHub ↗</a></p>
   </section>
 
-  <section class="verify-faq" aria-labelledby="faq-title">
+  <section class="verify-faq verify-reveal" aria-labelledby="faq-title">
     <div class="verify-section-label">FAQ</div>
     <div>
       <h2 id="faq-title">The short answers.</h2>
@@ -164,5 +222,5 @@ $windowsInstall = 'curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev
   </section>
 </main>
 
-<script src="/assets/js/verify.js?v=1" defer></script>
+<script src="/assets/js/verify.js?v=2" defer></script>
 <?php require __DIR__ . '/includes/footer.php'; ?>

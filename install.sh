@@ -26,7 +26,10 @@ mkdir -p "$prefix"
 tmp="$(mktemp "${TMPDIR:-/tmp}/astray-verify.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT INT TERM
 
-if curl -fsSL --retry 3 --retry-delay 1 "$url" -o "$tmp"; then
+echo "Downloading ${asset}…"
+if curl --fail --location --silent --show-error \
+  --connect-timeout 10 --max-time 60 --retry 2 --retry-delay 1 \
+  "$url" -o "$tmp"; then
   chmod 755 "$tmp"
   mv "$tmp" "$prefix/astray-verify"
   trap - EXIT INT TERM
@@ -34,12 +37,13 @@ if curl -fsSL --retry 3 --retry-delay 1 "$url" -o "$tmp"; then
 else
   rm -f "$tmp"
   trap - EXIT INT TERM
+  echo "A prebuilt binary could not be downloaded within 60 seconds." >&2
   if ! command -v cargo >/dev/null 2>&1; then
-    echo "No prebuilt binary is available for this platform yet, and Rust is not installed." >&2
+    echo "Rust is not installed, so Astray Verify cannot fall back to a source build." >&2
     echo "Install Rust at https://rustup.rs, then run this command again." >&2
     exit 1
   fi
-  echo "No prebuilt binary yet; building the latest release from source…"
+  echo "Falling back to a source build. This can take several minutes the first time…"
   cargo install --git "https://github.com/${repo}.git" --locked --force astray-verify
   prefix="${CARGO_HOME:-$HOME/.cargo}/bin"
 fi
