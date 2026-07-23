@@ -301,9 +301,21 @@ repeatable check that runs after every change in local development or CI.
 
 ## Contributors
 
-This project is maintained by:
-
-- **TheAstrayDev** — [@TheAstrayDev](https://github.com/TheAstrayDev)
+<table>
+  <tr>
+    <td align="center" valign="top">
+      <a href="https://github.com/TheAstrayDev">
+        <img src="https://github.com/TheAstrayDev.png?size=120" width="120" height="120" alt="TheAstrayDev avatar" />
+        <br />
+        <sub><b>TheAstrayDev</b> · Ilya</sub>
+      </a>
+      <br />
+      <sub>Author and maintainer</sub>
+      <br />
+      <a href="https://github.com/TheAstrayDev">@TheAstrayDev</a>
+    </td>
+  </tr>
+</table>
 
 Issues, fixtures from real servers, and focused pull requests are
 welcome. Please do not add new transport or client support without a
