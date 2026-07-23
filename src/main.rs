@@ -894,7 +894,7 @@ fn audit_contract(contract: &ServerContract) -> Vec<AuditIssue> {
             recommendation: "Keep the recorded fixture in CI to preserve this baseline.".into(),
         });
     }
-    findings.sort_by(|left, right| right.score.cmp(&left.score));
+    findings.sort_by_key(|finding| std::cmp::Reverse(finding.score));
     findings
 }
 
@@ -950,7 +950,7 @@ fn audit(
         ui.detail("action", &weakest_link.recommendation);
         for finding in findings.iter().skip(1) {
             ui.detail(
-                &finding.severity,
+                finding.severity,
                 format!("{}: {}", finding.area, finding.finding),
             );
         }
