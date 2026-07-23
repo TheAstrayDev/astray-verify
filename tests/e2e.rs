@@ -46,3 +46,49 @@ fn records_and_replays_a_stdio_contract() {
 
     fs::remove_dir_all(&root).expect("remove temporary project");
 }
+
+#[test]
+fn audits_a_server_and_writes_an_execution_log() {
+    let root = temporary_project();
+    fs::create_dir_all(&root).expect("create temporary project");
+    let executable = env!("CARGO_BIN_EXE_astray-verify");
+    let server = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples/echo_server.py");
+
+    let audit = Command::new(executable)
+        .current_dir(&root)
+        .args(["--json", "--log", "audit.jsonl", "audit", "--", "python3"])
+        .arg(&server)
+        .output()
+        .expect("run audit command");
+    assert!(
+        audit.status.success(),
+        "audit failed: {}",
+        String::from_utf8_lossy(&audit.stderr)
+    );
+    let report = String::from_utf8_lossy(&audit.stdout);
+    assert!(report.contains("weakest_link"));
+    let log = fs::read_to_string(root.join("audit.jsonl")).expect("read audit log");
+    assert!(log.contains("\"command\":\"audit\""));
+
+    fs::remove_dir_all(&root).expect("remove temporary project");
+}
+
+#[test]
+fn doctor_summarizes_a_fresh_project() {
+    let root = temporary_project();
+    fs::create_dir_all(&root).expect("create temporary project");
+    let executable = env!("CARGO_BIN_EXE_astray-verify");
+
+    let doctor = Command::new(executable)
+        .current_dir(&root)
+        .args(["--json", "doctor"])
+        .output()
+        .expect("run doctor command");
+    let stdout = String::from_utf8_lossy(&doctor.stdout);
+    assert!(
+        stdout.contains("\"command\":\"doctor\""),
+        "doctor JSON output missing: {stdout}"
+    );
+
+    fs::remove_dir_all(&root).expect("remove temporary project");
+}
