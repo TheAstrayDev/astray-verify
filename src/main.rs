@@ -38,6 +38,9 @@ struct Cli {
     json: bool,
     #[arg(long, global = true, num_args = 0..=1, default_missing_value = "logs/astray-verify.jsonl")]
     log: Option<String>,
+    /// Override the configured fixtures directory for this invocation.
+    #[arg(long, global = true)]
+    fixtures_dir: Option<String>,
     #[command(subcommand)]
     command: Commands,
 }
@@ -326,9 +329,9 @@ fn default_config() -> ProjectConfig {
     }
 }
 
-fn load_config(root: &Path) -> Result<ProjectConfig> {
+fn load_config(root: &Path, override_dir: Option<&str>) -> Result<ProjectConfig> {
     let path = root.join(CONFIG_FILE);
-    let config: ProjectConfig = serde_json::from_str(
+    let mut config: ProjectConfig = serde_json::from_str(
         &fs::read_to_string(&path)
             .with_context(|| format!("could not read {}; run init first", path.display()))?,
     )
@@ -338,6 +341,9 @@ fn load_config(root: &Path) -> Result<ProjectConfig> {
             "unsupported config version {}; expected 1 or 2",
             config.version
         );
+    }
+    if let Some(override_dir) = override_dir {
+        config.fixtures_dir = override_dir.to_owned();
     }
     safe_relative_path(&config.fixtures_dir, "fixtures_dir")?;
     Ok(config)
@@ -352,15 +358,18 @@ fn fixture_path(root: &Path, config: &ProjectConfig, name: &str) -> Result<PathB
     Ok(fixtures_dir(root, config)?.join(format!("{name}.mcp.json")))
 }
 
-fn ensure_project(root: &Path) -> Result<(ProjectConfig, bool)> {
+fn ensure_project(root: &Path, override_dir: Option<&str>) -> Result<(ProjectConfig, bool)> {
     let config_path = root.join(CONFIG_FILE);
     let created = !config_path.exists();
     let config = if created {
-        let config = default_config();
+        let mut config = default_config();
+        if let Some(override_dir) = override_dir {
+            config.fixtures_dir = override_dir.to_owned();
+        }
         fs::write(&config_path, serde_json::to_string_pretty(&config)? + "\n")?;
         config
     } else {
-        load_config(root)?
+        load_config(root, override_dir)?
     };
     let dir = fixtures_dir(root, &config)?;
     fs::create_dir_all(&dir)?;
@@ -619,9 +628,9 @@ impl Ui {
     }
 }
 
-fn init(root: &Path, ui: &Ui) -> Result<ProjectConfig> {
+fn init(root: &Path, override_dir: Option<&str>, ui: &Ui) -> Result<ProjectConfig> {
     ui.header("Initialize project");
-    let (config, created) = ensure_project(root)?;
+    let (config, created) = ensure_project(root, override_dir)?;
     let config_path = root.join(CONFIG_FILE);
     let dir = fixtures_dir(root, &config)?;
     if created {
@@ -647,10 +656,11 @@ fn record(
     checks: Vec<CheckKind>,
     timeout_ms: Option<u64>,
     server: Vec<String>,
+    override_dir: Option<&str>,
     ui: &Ui,
 ) -> Result<()> {
     validate_fixture_name(&name)?;
-    let (config, created) = ensure_project(root)?;
+    let (config, created) = ensure_project(root, override_dir)?;
     let path = fixture_path(root, &config, &name)?;
     ui.header("Record contract");
     if created {
@@ -753,10 +763,11 @@ fn run_tests(
     root: &Path,
     only_name: Option<String>,
     timeout_override: Option<u64>,
+    override_dir: Option<&str>,
     ui: &Ui,
 ) -> Result<bool> {
     ui.header("Verify contracts");
-    let config = load_config(root)?;
+    let config = load_config(root, override_dir)?;
     let mut paths = if let Some(name) = only_name {
         vec![fixture_path(root, &config, &name)?]
     } else {
@@ -892,6 +903,7 @@ fn audit(
     name: Option<String>,
     timeout_ms: u64,
     server: Vec<String>,
+    override_dir: Option<&str>,
     ui: &Ui,
 ) -> Result<()> {
     if timeout_ms == 0 {
@@ -900,7 +912,7 @@ fn audit(
     let (server, settings) = if server.is_empty() {
         let name = name
             .context("provide a server command after -- or select a saved fixture with --name")?;
-        let config = load_config(root)?;
+        let config = load_config(root, override_dir)?;
         let path = fixture_path(root, &config, &name)?;
         let fixture: Fixture = serde_json::from_str(
             &fs::read_to_string(&path)
@@ -956,8 +968,8 @@ fn audit(
     })
 }
 
-fn show_config(root: &Path, ui: &Ui) -> Result<()> {
-    let config = load_config(root)?;
+fn show_config(root: &Path, override_dir: Option<&str>, ui: &Ui) -> Result<()> {
+    let config = load_config(root, override_dir)?;
     if !ui.json {
         ui.header("Project configuration");
         ui.detail("fixtures", &config.fixtures_dir);
@@ -970,20 +982,20 @@ fn show_config(root: &Path, ui: &Ui) -> Result<()> {
     ui.report(&json!({"command": "config", "status": "ok", "config": config}))
 }
 
-fn doctor(root: &Path, with_test: bool, ui: &Ui) -> Result<()> {
+fn doctor(root: &Path, with_test: bool, override_dir: Option<&str>, ui: &Ui) -> Result<()> {
     ui.header("Diagnose project");
     let mut checks = Vec::new();
     let mut ok = true;
     let config_path = root.join(CONFIG_FILE);
     let config = if config_path.exists() {
-        let config = load_config(root)?;
+        let config = load_config(root, override_dir)?;
         ui.success(format!("Config file present: {}", config_path.display()));
         checks.push(
             json!({"name": "config", "status": "ok", "path": config_path.display().to_string()}),
         );
         config
     } else {
-        let (config, _) = ensure_project(root)?;
+        let (config, _) = ensure_project(root, override_dir)?;
         ui.success(format!("Created {}", config_path.display()));
         checks.push(json!({"name": "config", "status": "initialized", "path": config_path.display().to_string()}));
         config
@@ -1026,7 +1038,7 @@ fn doctor(root: &Path, with_test: bool, ui: &Ui) -> Result<()> {
         );
     }
     if with_test {
-        let passed = run_tests(root, None, None, ui)?;
+        let passed = run_tests(root, None, None, override_dir, ui)?;
         if !passed {
             ok = false;
         }
@@ -1035,14 +1047,14 @@ fn doctor(root: &Path, with_test: bool, ui: &Ui) -> Result<()> {
     Ok(())
 }
 
-fn run_watch(root: &Path, initial: bool, ui: &Ui) -> Result<bool> {
+fn run_watch(root: &Path, initial: bool, override_dir: Option<&str>, ui: &Ui) -> Result<bool> {
     use std::time::Duration as StdDuration;
-    let config = load_config(root)?;
+    let config = load_config(root, override_dir)?;
     let config_path = root.join(CONFIG_FILE);
     let fixtures_path = fixtures_dir(root, &config)?;
     let watched = vec![config_path, fixtures_path];
     if initial {
-        let _ = run_tests(root, None, None, ui)?;
+        let _ = run_tests(root, None, None, override_dir, ui)?;
     }
     ui.header("Watching project for changes");
     ui.step("Press Ctrl+C to stop");
@@ -1069,7 +1081,7 @@ fn run_watch(root: &Path, initial: bool, ui: &Ui) -> Result<bool> {
         }
         if last_signature.is_some() && Some(signature) != last_signature {
             ui.step("Changes detected, re-running tests");
-            let _ = run_tests(root, None, None, ui);
+            let _ = run_tests(root, None, None, override_dir, ui);
         }
         last_signature = Some(signature);
         thread::sleep(StdDuration::from_millis(750));
@@ -1090,6 +1102,7 @@ fn run(cli: Cli, ui: &Ui) -> Result<bool> {
         .map(|path| safe_relative_path(path, "log path"))
         .transpose()?
         .map(|path| root.join(path));
+    let fixtures_dir = cli.fixtures_dir.as_deref();
     let command = match &cli.command {
         Commands::Init => "init",
         Commands::Record { .. } => "record",
@@ -1100,22 +1113,22 @@ fn run(cli: Cli, ui: &Ui) -> Result<bool> {
         Commands::Watch { .. } => "watch",
     };
     let result = match cli.command {
-        Commands::Init => init(&root, ui).map(|_| true),
+        Commands::Init => init(&root, fixtures_dir, ui).map(|_| true),
         Commands::Record {
             name,
             checks,
             timeout_ms,
             server,
-        } => record(&root, name, checks, timeout_ms, server, ui).map(|_| true),
-        Commands::Test { name, timeout_ms } => run_tests(&root, name, timeout_ms, ui),
+        } => record(&root, name, checks, timeout_ms, server, fixtures_dir, ui).map(|_| true),
+        Commands::Test { name, timeout_ms } => run_tests(&root, name, timeout_ms, fixtures_dir, ui),
         Commands::Audit {
             name,
             timeout_ms,
             server,
-        } => audit(&root, name, timeout_ms, server, ui).map(|_| true),
-        Commands::Config => show_config(&root, ui).map(|_| true),
-        Commands::Doctor { with_test } => doctor(&root, with_test, ui).map(|_| true),
-        Commands::Watch { initial } => run_watch(&root, initial, ui).map(|_| true),
+        } => audit(&root, name, timeout_ms, server, fixtures_dir, ui).map(|_| true),
+        Commands::Config => show_config(&root, fixtures_dir, ui).map(|_| true),
+        Commands::Doctor { with_test } => doctor(&root, with_test, fixtures_dir, ui).map(|_| true),
+        Commands::Watch { initial } => run_watch(&root, initial, fixtures_dir, ui).map(|_| true),
     };
     if let Some(path) = log_path {
         if let Some(parent) = path.parent() {

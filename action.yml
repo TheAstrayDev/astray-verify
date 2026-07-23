@@ -1,0 +1,115 @@
+name: 'Astray Verify'
+description: 'Record and replay MCP server contracts inside GitHub Actions'
+branding:
+  icon: 'shield-check'
+  color: 'blue'
+inputs:
+  command:
+    description: 'astray-verify subcommand to run (init, record, test, audit, config, doctor, watch).'
+    required: false
+    default: 'test'
+  version:
+    description: 'astray-verify version to install. Use "source" to build from this repository.'
+    required: false
+    default: 'latest'
+  checks:
+    description: 'Comma-delimited MCP surfaces to verify: tools, resources, prompts.'
+    required: false
+    default: ''
+  timeout-ms:
+    description: 'Per-request timeout in milliseconds forwarded to the test/audit command.'
+    required: false
+    default: ''
+  log-file:
+    description: 'Path for the append-only JSON Lines execution log.'
+    required: false
+    default: ''
+  fixtures-dir:
+    description: 'Override the fixtures directory written by init or read by test.'
+    required: false
+    default: ''
+  audit-on-failure:
+    description: 'When the run fails, execute astray-verify audit for every fixture to surface the weakest link.'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Resolve version
+      id: version
+      shell: bash
+      run: |
+        if [ "${{ inputs.version }}" != "latest" ] && [ -n "${{ inputs.version }}" ]; then
+          echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        version=$(curl -fsSL https://api.github.com/repos/TheAstrayDev/astray-verify/releases/latest \
+          | sed -n 's/.*"tag_name": *"v\?\([^"]*\)".*/\1/p')
+        if [ -z "$version" ]; then
+          echo "::error::could not resolve latest astray-verify version"
+          exit 1
+        fi
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+
+    - name: Install astray-verify
+      id: install
+      shell: bash
+      run: |
+        set -euo pipefail
+        version="${{ steps.version.outputs.version }}"
+        if [ "${{ inputs.version }}" = "source" ]; then
+          cargo install --path . --locked --force
+        else
+          archive="astray-verify-${version}-x86_64-unknown-linux-gnu.tar.xz"
+          url="https://github.com/TheAstrayDev/astray-verify/releases/download/v${version}/${archive}"
+          echo "Downloading ${url}"
+          curl -fsSL "$url" -o astray-verify.tar.xz
+          tar -xJf astray-verify.tar.xz
+          sudo install -m 0755 astray-verify /usr/local/bin/astray-verify
+        fi
+        astray-verify --version
+
+    - name: Run astray-verify
+      id: run
+      shell: bash
+      run: |
+        set -euo pipefail
+        args=("${{ inputs.command }}")
+        if [ -n "${{ inputs.checks }}" ]; then
+          args+=(--checks "${{ inputs.checks }}")
+        fi
+        if [ -n "${{ inputs.timeout-ms }}" ]; then
+          args+=(--timeout-ms "${{ inputs.timeout-ms }}")
+        fi
+        if [ -n "${{ inputs.log-file }}" ]; then
+          args+=(--log "${{ inputs.log-file }}")
+        fi
+        if [ -n "${{ inputs.fixtures-dir }}" ]; then
+          args+=(--fixtures-dir "${{ inputs.fixtures-dir }}")
+        fi
+        echo "Running: astray-verify ${args[*]}"
+        astray-verify "${args[@]}"
+
+    - name: Audit on failure
+      if: failure() && inputs.audit-on-failure == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        dir="${{ inputs.fixtures-dir }}"
+        if [ -z "$dir" ] && [ -d fixtures ]; then
+          dir="fixtures"
+        fi
+        if [ -z "$dir" ] || [ ! -d "$dir" ]; then
+          echo "::warning::no fixtures directory available; skipping audit step"
+          exit 0
+        fi
+        shopt -s nullglob
+        for fixture in "$dir"/*.mcp.json; do
+          [ -f "$fixture" ] || continue
+          name=$(basename "$fixture" .mcp.json)
+          name=${name%.mcp}
+          echo "::group::Audit $name"
+          astray-verify --color never audit --name "$name" || true
+          echo "::endgroup::"
+        done

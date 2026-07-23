@@ -1,16 +1,16 @@
 [package]
 name = "astray-verify"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
-description = "Record and replay MCP server contracts, with deep audit and weakest-link analysis"
+description = "Record and replay MCP server contracts, with deep audit, weakest-link analysis, and a GitHub Action for CI"
 license = "MIT"
 authors = ["TheAstrayDev <https://github.com/TheAstrayDev>"]
 repository = "https://github.com/TheAstrayDev/astray-verify"
 homepage = "https://github.com/TheAstrayDev/astray-verify"
 documentation = "https://github.com/TheAstrayDev/astray-verify#readme"
 readme = "README.md"
-keywords = ["mcp", "model-context-protocol", "testing", "contract", "cli"]
-categories = ["command-line-utilities", "development-tools::testing"]
+keywords = ["mcp", "model-context-protocol", "ai-tools", "testing", "contract", "cli", "regression", "snapshot", "json-rpc", "ci"]
+categories = ["command-line-utilities", "development-tools::testing", "development-tools::debugging"]
 exclude = [".github/*", "site/*", "target/*"]
 
 [dependencies]

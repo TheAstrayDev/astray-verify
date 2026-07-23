@@ -13,6 +13,7 @@
 [![Downloads](https://img.shields.io/crates/d/astray-verify.svg?style=for-the-badge)](https://crates.io/crates/astray-verify)
 [![Stars](https://img.shields.io/github/stars/TheAstrayDev/astray-verify?style=for-the-badge)](https://github.com/TheAstrayDev/astray-verify/stargazers)
 [![Issues](https://img.shields.io/github/issues/TheAstrayDev/astray-verify?style=for-the-badge)](https://github.com/TheAstrayDev/astray-verify/issues)
+![Topics](https://img.shields.io/github/topics/TheAstrayDev/astray-verify?style=for-the-badge)
 
 A tiny, local-first test runner for **Model Context Protocol** servers.
 Snapshot your `tools/list`, `resources/list`, and `prompts/list` contract once,
@@ -266,11 +267,37 @@ repeatable check that runs after every change in local development or CI.
 
 ## Roadmap
 
+- [x] Per-fixture check selection and timeouts
+- [x] MCP contract audit with weakest-link diagnosis
+- [x] JSON Lines execution logs
+- [x] Doctor and watch automation commands
+- [x] **GitHub Action** — `TheAstrayDev/astray-verify@v0.2.1` ships a
+      composite Action that installs the CLI, runs any subcommand, and
+      audits every failing fixture
 - [ ] Record and replay `tools/call` fixtures
 - [ ] Stable, reviewable JSON diff output
-- [ ] GitHub Action
 - [ ] Streamable HTTP support
 - [ ] Compatibility profiles for major MCP clients
+
+### Using the GitHub Action
+
+```yaml
+- name: Verify MCP contracts
+  uses: TheAstrayDev/astray-verify@v0.2.1
+  with:
+    command: test
+    checks: tools,resources,prompts
+    timeout-ms: 45000
+    log-file: logs/astray-verify.jsonl
+    audit-on-failure: "true"
+
+- name: Upload execution log
+  if: always()
+  uses: actions/upload-artifact@v4
+  with:
+    name: astray-verify-log
+    path: logs/astray-verify.jsonl
+```
 
 ## Contributors
 
