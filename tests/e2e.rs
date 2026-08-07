@@ -21,7 +21,7 @@ fn records_and_replays_a_stdio_contract() {
 
     let record = Command::new(executable)
         .current_dir(&root)
-        .args(["record", "--name", "echo", "--", "python3"])
+        .args(["record", "--name", "echo", "--", "python"])
         .arg(&server)
         .output()
         .expect("run record command");
@@ -34,7 +34,7 @@ fn records_and_replays_a_stdio_contract() {
 
     let replay = Command::new(executable)
         .current_dir(&root)
-        .arg("test")
+        .args(["test", "--checks", "tools"])
         .output()
         .expect("run test command");
     assert!(
@@ -56,7 +56,7 @@ fn audits_a_server_and_writes_an_execution_log() {
 
     let audit = Command::new(executable)
         .current_dir(&root)
-        .args(["--json", "--log", "audit.jsonl", "audit", "--", "python3"])
+        .args(["--json", "--log", "audit.jsonl", "audit", "--", "python"])
         .arg(&server)
         .output()
         .expect("run audit command");

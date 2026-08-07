@@ -64,6 +64,9 @@ enum Commands {
     Test {
         #[arg(long)]
         name: Option<String>,
+        /// Override the MCP surfaces stored in each selected fixture.
+        #[arg(long, value_delimiter = ',')]
+        checks: Option<Vec<CheckKind>>,
         #[arg(long)]
         timeout_ms: Option<u64>,
     },
@@ -708,15 +711,22 @@ fn record(
     })
 }
 
-fn test_fixture(path: &Path, timeout_override: Option<u64>, ui: &Ui) -> Result<String> {
+fn test_fixture(
+    path: &Path,
+    checks_override: Option<&[CheckKind]>,
+    timeout_override: Option<u64>,
+    ui: &Ui,
+) -> Result<String> {
     let fixture: Fixture = serde_json::from_str(
         &fs::read_to_string(path).with_context(|| format!("could not read {}", path.display()))?,
     )
     .with_context(|| format!("could not parse fixture {}", path.display()))?;
     validate_fixture(&fixture, path)?;
     let settings = CheckSettings {
+        checks: checks_override
+            .map(|checks| checks.to_vec())
+            .unwrap_or_else(|| fixture.settings.checks.clone()),
         timeout_ms: timeout_override.unwrap_or(fixture.settings.timeout_ms),
-        ..fixture.settings.clone()
     };
     if settings.timeout_ms == 0 {
         bail!("{}: timeout_ms must be greater than zero", fixture.name);
@@ -762,6 +772,7 @@ fn test_fixture(path: &Path, timeout_override: Option<u64>, ui: &Ui) -> Result<S
 fn run_tests(
     root: &Path,
     only_name: Option<String>,
+    checks_override: Option<Vec<CheckKind>>,
     timeout_override: Option<u64>,
     override_dir: Option<&str>,
     ui: &Ui,
@@ -785,7 +796,7 @@ fn run_tests(
     let mut passed = Vec::new();
     let mut failed = Vec::new();
     for path in paths {
-        match test_fixture(&path, timeout_override, ui) {
+        match test_fixture(&path, checks_override.as_deref(), timeout_override, ui) {
             Ok(name) => passed.push(name),
             Err(error) => {
                 let name = path
@@ -1038,7 +1049,7 @@ fn doctor(root: &Path, with_test: bool, override_dir: Option<&str>, ui: &Ui) -> 
         );
     }
     if with_test {
-        let passed = run_tests(root, None, None, override_dir, ui)?;
+        let passed = run_tests(root, None, None, None, override_dir, ui)?;
         if !passed {
             ok = false;
         }
@@ -1054,7 +1065,7 @@ fn run_watch(root: &Path, initial: bool, override_dir: Option<&str>, ui: &Ui) ->
     let fixtures_path = fixtures_dir(root, &config)?;
     let watched = vec![config_path, fixtures_path];
     if initial {
-        let _ = run_tests(root, None, None, override_dir, ui)?;
+        let _ = run_tests(root, None, None, None, override_dir, ui)?;
     }
     ui.header("Watching project for changes");
     ui.step("Press Ctrl+C to stop");
@@ -1081,7 +1092,7 @@ fn run_watch(root: &Path, initial: bool, override_dir: Option<&str>, ui: &Ui) ->
         }
         if last_signature.is_some() && Some(signature) != last_signature {
             ui.step("Changes detected, re-running tests");
-            let _ = run_tests(root, None, None, override_dir, ui);
+            let _ = run_tests(root, None, None, None, override_dir, ui);
         }
         last_signature = Some(signature);
         thread::sleep(StdDuration::from_millis(750));
@@ -1120,7 +1131,11 @@ fn run(cli: Cli, ui: &Ui) -> Result<bool> {
             timeout_ms,
             server,
         } => record(&root, name, checks, timeout_ms, server, fixtures_dir, ui).map(|_| true),
-        Commands::Test { name, timeout_ms } => run_tests(&root, name, timeout_ms, fixtures_dir, ui),
+        Commands::Test {
+            name,
+            checks,
+            timeout_ms,
+        } => run_tests(&root, name, checks, timeout_ms, fixtures_dir, ui),
         Commands::Audit {
             name,
             timeout_ms,

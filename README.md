@@ -2,97 +2,63 @@
 
 # Astray Verify
 
-> Record an MCP server's contract once. Catch breaking changes before your AI clients do.
+### Keep MCP changes intentional.
 
-[![Latest Release](https://img.shields.io/github/v/release/TheAstrayDev/astray-verify?include_prereleases&sort=semver&style=for-the-badge)](https://github.com/TheAstrayDev/astray-verify/releases/latest)
-[![CI](https://img.shields.io/github/actions/workflow/status/TheAstrayDev/astray-verify/ci.yml?branch=main&style=for-the-badge)](https://github.com/TheAstrayDev/astray-verify/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-2b8a3e.svg?style=for-the-badge)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.74%2B-orange.svg?style=for-the-badge&logo=rust)](https://www.rust-lang.org)
-[![MCP](https://img.shields.io/badge/MCP-contract%20tests-161616.svg?style=for-the-badge)](https://modelcontextprotocol.io/)
-[![Crates.io](https://img.shields.io/crates/v/astray-verify.svg?style=for-the-badge)](https://crates.io/crates/astray-verify)
-[![Downloads](https://img.shields.io/crates/d/astray-verify.svg?style=for-the-badge)](https://crates.io/crates/astray-verify)
-[![Stars](https://img.shields.io/github/stars/TheAstrayDev/astray-verify?style=for-the-badge)](https://github.com/TheAstrayDev/astray-verify/stargazers)
-[![Issues](https://img.shields.io/github/issues/TheAstrayDev/astray-verify?style=for-the-badge)](https://github.com/TheAstrayDev/astray-verify/issues)
-![Topics](https://img.shields.io/github/topics/TheAstrayDev/astray-verify?style=for-the-badge)
+Record the public contract of an MCP server, commit it with the server, and detect accidental breaking changes in local development or CI.
 
-A tiny, local-first test runner for **Model Context Protocol** servers.
-Snapshot your `tools/list`, `resources/list`, and `prompts/list` contract once,
-then catch breaking changes locally and in CI.
+[![Release](https://img.shields.io/github/v/release/TheAstrayDev/astray-verify?style=flat-square)](https://github.com/TheAstrayDev/astray-verify/releases/latest)
+[![CI](https://img.shields.io/github/actions/workflow/status/TheAstrayDev/astray-verify/ci.yml?branch=main&style=flat-square&label=checks)](https://github.com/TheAstrayDev/astray-verify/actions/workflows/ci.yml)
+[![MIT license](https://img.shields.io/badge/license-MIT-176a4b?style=flat-square)](LICENSE)
+[![Rust](https://img.shields.io/badge/Rust-1.74%2B-orange?style=flat-square)](https://www.rust-lang.org/)
 
-[Install](#install) · [Quick start](#quick-start) · [Commands](#commands) · [Roadmap](#roadmap) · [Contributors](#contributors)
+[Get started](#get-started) · [GitHub Action](#github-action) · [CLI reference](#cli-reference) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
----
+## What it protects
 
-## Why Astray Verify?
-
-An MCP server can still start successfully after a release while an AI client
-has quietly lost a tool, received a changed JSON schema, or begun seeing
-invalid data on `stdout`. Astray Verify turns the server interface that
-already works today into a committed regression test.
+An MCP server can start normally while clients fail because a tool was renamed, its JSON schema changed, or a discovery surface drifted. Astray Verify makes the interface explicit:
 
 ```text
-working MCP server
-       │
-       ├── astray-verify record
-       │       saves the expected tools, resources, and prompts
-       │
-       └── astray-verify test
-       │       fails when a later change breaks that contract
-       │
-       └── astray-verify audit
-               ranks protocol and contract weaknesses, names the weakest link
+record a known-good server  →  commit its fixture  →  replay it on every change
 ```
 
-Fixtures are plain JSON, designed to be reviewed and committed with the
-server source.
+It is local-first: no model calls, accounts, tokens, dashboards, or hosted state. Fixtures are readable JSON files that belong beside your server code.
 
-## Install
+## Get started
 
-### Linux and macOS
+### Install a release binary
+
+Linux and macOS:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/TheAstrayDev/astray-verify/main/install.sh | sh
 ```
 
-### Windows PowerShell
+Windows PowerShell:
 
 ```powershell
 curl.exe -fsSL https://raw.githubusercontent.com/TheAstrayDev/astray-verify/main/install.ps1 | powershell -NoProfile -ExecutionPolicy Bypass -
 ```
 
-The installers download the matching binary from the latest GitHub Release.
-
-### From source
-
-```bash
-git clone https://github.com/TheAstrayDev/astray-verify.git
-cd astray-verify
-cargo install --path .
-```
-
-### From crates.io
+Or install from source:
 
 ```bash
 cargo install astray-verify
 ```
 
-## Quick start
+### Create and verify a contract
 
-Run these commands inside the repository that contains your MCP server:
+Run this in the repository that contains your MCP server. Everything after `--` starts the server you are testing.
 
 ```bash
 astray-verify init
-
-# Everything after -- is the command that starts your MCP server.
 astray-verify record --name filesystem -- \
   npx -y @modelcontextprotocol/server-filesystem ./demo
-
 astray-verify test
 ```
 
-You will get two files worth committing:
+Commit the files Astray Verify creates:
 
 ```text
 astray.verify.json
@@ -100,96 +66,70 @@ fixtures/
   filesystem.mcp.json
 ```
 
-When an intentional interface change is made, record the fixture again and
-review the diff just like any other API change.
+When an API change is deliberate, record the fixture again and review its diff with the code change.
 
-## Example
+## What is checked
 
-The repository includes a minimal MCP demo server:
+| Surface | Default | Detects |
+| --- | --- | --- |
+| `tools/list` | Yes | Added, removed, or changed tool definitions and schemas |
+| `resources/list` | Optional | Resource discovery contract changes |
+| `prompts/list` | Optional | Prompt discovery contract changes |
+
+Record a complete discovery contract with a suitable timeout:
 
 ```bash
-mkdir /tmp/astray-verify-demo && cd /tmp/astray-verify-demo
-astray-verify init
-astray-verify record --name echo -- \
-  python3 /path/to/astray-verify/examples/echo_server.py
-astray-verify test
+astray-verify record --name complete \
+  --checks tools,resources,prompts --timeout-ms 45000 -- npx your-mcp-server
 ```
 
-Expected result:
+For a temporary CI policy, override the fixture's stored surfaces or timeout:
 
-```text
-ASTRAY VERIFY  MCP CONTRACTS
-────────────────────────────────────────
-Verify contracts
-● Checking echo
-✓ PASS  echo
-✓ 1 passed · 0 failed
+```bash
+astray-verify test --checks tools,resources,prompts --timeout-ms 60000
 ```
 
-## Commands
+## GitHub Action
 
-| Command | What it does |
+Use the composite Action to install the latest release and test committed fixtures:
+
+```yaml
+- name: Verify MCP contracts
+  uses: TheAstrayDev/astray-verify@v0.2.2
+  with:
+    command: test
+    checks: tools,resources,prompts
+    timeout-ms: 45000
+    log-file: logs/astray-verify.jsonl
+    audit-on-failure: "true"
+```
+
+The Action installs the Linux release binary, writes an optional JSON Lines log, and audits each fixture after a failed run to help locate the weak link.
+
+## CLI reference
+
+| Command | Purpose |
 | --- | --- |
-| `astray-verify init` | Create `astray.verify.json` and the fixtures directory. |
-| `astray-verify record` | Launch the MCP server, snapshot its contract into a fixture. |
-| `astray-verify test` | Replay saved fixtures and report interface regressions. |
-| `astray-verify audit` | Inspect the MCP server and rank protocol/contract weaknesses, with a single named weakest link. |
-| `astray-verify config` | Show the resolved project configuration and defaults. |
-| `astray-verify doctor` | One-shot project health check: config, fixtures, log, optional test pass. |
-| `astray-verify watch` | Re-run `test` whenever a fixture or configuration file changes. |
+| `init` | Create the project configuration and fixture directory. |
+| `record` | Start a server and save its selected discovery surfaces. |
+| `test` | Replay fixtures and report contract drift. |
+| `audit` | Inspect a server or fixture and rank protocol risks. |
+| `config` | Print the resolved project configuration. |
+| `doctor` | Check configuration, fixtures, logs, and optionally run tests. |
+| `watch` | Re-run tests whenever configuration or fixtures change. |
 
-Global flags:
-
-```bash
-astray-verify --color never test    # disable ANSI colour explicitly
-astray-verify --json test           # one structured JSON report on stdout
-astray-verify --log test.jsonl test # append JSON Lines execution log
-```
-
-## CLI experience
-
-The normal output is deliberately short enough for CI and expressive enough
-for local work. In an interactive terminal it adds a compact `ASTRAY VERIFY`
-header and coloured status markers; redirected output stays clean and
-colour-free.
-
-```text
-ASTRAY VERIFY  MCP CONTRACTS
-────────────────────────────────────────
-Verify contracts
-● Checking filesystem
-✓ PASS  filesystem
-✓ 1 passed · 0 failed
-```
-
-When a contract changes, the failure explains the shape of the change
-instead of only reporting a generic mismatch:
-
-```text
-✗ FAIL  filesystem
-   removed tool `read_file`
-   changed contract for `write_file`
-```
-
-## Configurable verification
-
-`record` can snapshot each MCP discovery surface independently. The fixture
-stores these settings, so CI uses the same checks and timeout as the
-baseline:
+Global options are available on every command:
 
 ```bash
-# Tools only (default)
-astray-verify record --name filesystem --checks tools -- npx your-server
-
-# Tools, resources, and prompts, with a custom timeout
-astray-verify record --name complete --checks tools,resources,prompts \
-  --timeout-ms 45000 -- npx your-server
-
-# Override a fixture timeout for one CI run
-astray-verify test --name complete --timeout-ms 60000
+astray-verify --json test              # one machine-readable report
+astray-verify --log logs/verify.jsonl test
+astray-verify --fixtures-dir contracts test
+astray-verify --color never test
 ```
 
-`astray.verify.json` also supports project defaults:
+## Configuration
+
+`astray.verify.json` holds portable defaults for the repository:
 
 ```json
 {
@@ -202,126 +142,16 @@ astray-verify test --name complete --timeout-ms 60000
 }
 ```
 
-Use `astray-verify config` to inspect the resolved project defaults.
-Existing version 1 config files and fixtures remain supported.
+Version 1 fixtures and configuration remain supported.
 
-## MCP audit and logs
+## Scope and direction
 
-`audit` starts an MCP server, exercises the handshake plus all discovery
-surfaces, and ranks protocol and contract weaknesses. It calls out the
-single highest-risk area first with a concrete repair action.
+Current support is stdio MCP transport, the `initialize` handshake, discovery snapshots, structured output, execution logs, audit, and watch mode. Planned work includes `tools/call` fixtures, reviewable JSON diffs, Streamable HTTP, and client compatibility profiles.
 
-```bash
-astray-verify audit -- npx your-server
-astray-verify audit --name filesystem
-astray-verify --log audit.jsonl audit -- npx your-server
-```
+## Contributor
 
-Logs are newline-delimited JSON with command, timestamp, status, and error
-fields. `--json` produces one complete machine-readable report on stdout
-for every command, including all audit findings and the selected weakest
-link.
-
-## Doctor and watch
-
-`doctor` checks the project state in a single pass: configuration
-presence, fixture count, log file, and (with `--with-test`) a fresh run
-of the test suite. It also creates the project layout on demand so a
-fresh clone becomes usable with one call.
-
-```bash
-astray-verify doctor
-astray-verify doctor --with-test
-```
-
-`watch` keeps the contract honest during development. It runs the test
-suite once, then re-runs it whenever `astray.verify.json` or any fixture
-file changes.
-
-```bash
-astray-verify watch --initial
-```
-
-## Why not only use the MCP Inspector?
-
-The official MCP Inspector is excellent for exploring and debugging a
-server interactively. Astray Verify is for the next step: a small,
-repeatable check that runs after every change in local development or CI.
-
-| Inspector | Astray Verify |
-| --- | --- |
-| Explore and debug now | Preserve what worked for later |
-| Interactive | Commit-friendly fixture |
-| Individual calls | Regression check in CI |
-
-## Current scope
-
-- Stdio transport
-- MCP `initialize` handshake
-- Contract snapshots for `tools/list`, `resources/list`, and `prompts/list`
-- Per-fixture check selection and timeouts
-- MCP contract audit with actionable weakest-link diagnosis
-- Optional JSON Lines execution logs
-- Doctor and watch automation commands
-- Human-readable or JSON output
-
-## Roadmap
-
-- [x] Per-fixture check selection and timeouts
-- [x] MCP contract audit with weakest-link diagnosis
-- [x] JSON Lines execution logs
-- [x] Doctor and watch automation commands
-- [x] **GitHub Action** — `TheAstrayDev/astray-verify@v0.2.1` ships a
-      composite Action that installs the CLI, runs any subcommand, and
-      audits every failing fixture
-- [ ] Record and replay `tools/call` fixtures
-- [ ] Stable, reviewable JSON diff output
-- [ ] Streamable HTTP support
-- [ ] Compatibility profiles for major MCP clients
-
-### Using the GitHub Action
-
-```yaml
-- name: Verify MCP contracts
-  uses: TheAstrayDev/astray-verify@v0.2.1
-  with:
-    command: test
-    checks: tools,resources,prompts
-    timeout-ms: 45000
-    log-file: logs/astray-verify.jsonl
-    audit-on-failure: "true"
-
-- name: Upload execution log
-  if: always()
-  uses: actions/upload-artifact@v4
-  with:
-    name: astray-verify-log
-    path: logs/astray-verify.jsonl
-```
-
-## Contributors
-
-<table>
-  <tr>
-    <td align="center" valign="top">
-      <a href="https://github.com/TheAstrayDev">
-        <img src="https://github.com/TheAstrayDev.png?size=120" width="120" height="120" alt="TheAstrayDev avatar" />
-        <br />
-        <sub><b>TheAstrayDev</b> · Ilya</sub>
-      </a>
-      <br />
-      <sub>Author and maintainer</sub>
-      <br />
-      <a href="https://github.com/TheAstrayDev">@TheAstrayDev</a>
-    </td>
-  </tr>
-</table>
-
-Issues, fixtures from real servers, and focused pull requests are
-welcome. Please do not add new transport or client support without a
-reproducible test case. The project should stay small, predictable, and
-useful in CI.
+Astray Verify is created and maintained by [TheAstrayDev](https://github.com/TheAstrayDev). Contributor information lives in [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).

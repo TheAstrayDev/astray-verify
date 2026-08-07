@@ -61,12 +61,11 @@ runs:
         if [ "${{ inputs.version }}" = "source" ]; then
           cargo install --path . --locked --force
         else
-          archive="astray-verify-${version}-x86_64-unknown-linux-gnu.tar.xz"
-          url="https://github.com/TheAstrayDev/astray-verify/releases/download/v${version}/${archive}"
+          asset="astray-verify-linux-x86_64"
+          url="https://github.com/TheAstrayDev/astray-verify/releases/download/v${version}/${asset}"
           echo "Downloading ${url}"
-          curl -fsSL "$url" -o astray-verify.tar.xz
-          tar -xJf astray-verify.tar.xz
-          sudo install -m 0755 astray-verify /usr/local/bin/astray-verify
+          curl -fsSL "$url" -o astray-verify
+          install -m 0755 astray-verify /usr/local/bin/astray-verify
         fi
         astray-verify --version
 

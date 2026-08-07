@@ -4,6 +4,26 @@ All notable changes to **Astray Verify** are documented here. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-08-07
+
+### Added
+
+- `test --checks tools,resources,prompts` for a one-run verification-policy
+  override without rewriting committed fixtures.
+- Refreshed project documentation with a concise onboarding path, complete
+  GitHub Action example, and current CLI reference.
+
+### Fixed
+
+- The GitHub Action now downloads the release binary that the release workflow
+  actually publishes, rather than expecting a non-existent archive.
+- Website metadata now reports the current release version and cache-busts its
+  animated verification page assets.
+
+### Maintainer
+
+- TheAstrayDev — https://github.com/TheAstrayDev
+
 ## [0.2.1] - 2026-07-24
 
 ### Added

@@ -19,7 +19,7 @@ $verifySchema = [
     'description' => $seo['description'],
     'applicationCategory' => 'DeveloperApplication',
     'operatingSystem' => 'Linux, macOS, Windows',
-    'softwareVersion' => '0.1.0',
+    'softwareVersion' => '0.2.2',
     'codeRepository' => 'https://github.com/TheAstrayDev/astray-verify',
     'url' => 'https://theastraydev.online/verify',
     'downloadUrl' => 'https://github.com/TheAstrayDev/astray-verify/releases/latest',
@@ -83,7 +83,7 @@ $verifyFaqSchema = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/main.css?v=cli6">
-  <link rel="stylesheet" href="/assets/css/verify.css?v=6">
+  <link rel="stylesheet" href="/assets/css/verify.css?v=7">
 </head>
 <body>
 
@@ -222,5 +222,5 @@ $verifyFaqSchema = [
   </section>
 </main>
 
-<script src="/assets/js/verify.js?v=3" defer></script>
+<script src="/assets/js/verify.js?v=4" defer></script>
 <?php require __DIR__ . '/includes/footer.php'; ?>

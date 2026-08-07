@@ -1,6 +1,6 @@
 [package]
 name = "astray-verify"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 description = "Record and replay MCP server contracts, with deep audit, weakest-link analysis, and a GitHub Action for CI"
 license = "MIT"
