@@ -2,7 +2,7 @@
 
 # Astray Verify
 
-### Keep MCP changes intentional.
+Keep MCP changes intentional.
 
 Record the public contract of an MCP server, commit it with the server, and detect accidental breaking changes in local development or CI.
 
