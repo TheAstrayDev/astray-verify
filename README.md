@@ -1,6 +1,6 @@
 <div align="center">
 
-# Astray Verify
+Astray Verify
 
 Keep MCP changes intentional.
 
